@@ -411,7 +411,7 @@ class HashVisualizer {
     if (!act) return;
     if (kind === 'chain'){
       if (act.type === 'probe') {
-        this.visualHighlight('chain', act.idx);
+        this.visualHighlight('chain', act.idx, 'probe');
         this.addStep(`Probe chain bucket ${act.idx} for key ${act.key} (h=${act.hraw} -> idx ${act.idx})`);
       }
       else if (act.type === 'place') {
@@ -419,55 +419,147 @@ class HashVisualizer {
         this.visualPlace('chain', act.idx, act.key);
         this.addStep(`Placed key ${act.key} into chain bucket ${act.idx}`);
       }
-      else if (act.type === 'search_found') { this.visualHighlight('chain', act.idx); this.addStep(`Search: found key ${act.key} in chain bucket ${act.idx}`); setTimeout(()=> alert('Found in chain at bucket ' + act.idx), 100); }
-      else if (act.type === 'search_notfound') { this.visualHighlight('chain', act.idx); this.addStep(`Search: key ${act.key} not found in chain bucket ${act.idx}`); setTimeout(()=> alert('Not found in chain at bucket ' + act.idx), 100); }
-      else if (act.type === 'delete_place') { const arr = this.chainTable[act.idx]; const pos = arr.indexOf(act.key); if (pos!==-1) arr.splice(pos,1); this.visualPlace('chain', act.idx, null); this.addStep(`Deleted key ${act.key} from chain bucket ${act.idx}`); }
-      else if (act.type === 'delete_fail') { this.addStep(`Delete: key ${act.key} not found in chain`); setTimeout(()=> alert('Delete: not found in chain'), 80); }
+      else if (act.type === 'search_found') { 
+        this.visualHighlight('chain', act.idx, 'found'); 
+        this.addStep(`Search: found key ${act.key} in chain bucket ${act.idx}`); 
+        setTimeout(()=> alert('Found in chain at bucket ' + act.idx), 100); 
+      }
+      else if (act.type === 'search_notfound') { 
+        this.visualHighlight('chain', act.idx, 'notfound'); 
+        this.addStep(`Search: key ${act.key} not found in chain bucket ${act.idx}`); 
+        setTimeout(()=> alert('Not found in chain at bucket ' + act.idx), 100); 
+      }
+      else if (act.type === 'delete_place') { 
+        const arr = this.chainTable[act.idx]; 
+        const pos = arr.indexOf(act.key); 
+        if (pos!==-1) arr.splice(pos,1); 
+        this.visualPlace('chain', act.idx, null); 
+        this.addStep(`Deleted key ${act.key} from chain bucket ${act.idx}`); 
+      }
+      else if (act.type === 'delete_fail') { 
+        this.addStep(`Delete: key ${act.key} not found in chain`); 
+        setTimeout(()=> alert('Delete: not found in chain'), 80); 
+      }
     }
 
     if (kind === 'linear'){
       if (act.type === 'probe') {
-        this.visualHighlight('linear', act.idx);
         const occ = this.linearTable[act.idx] && this.linearTable[act.idx].occupied;
-        if (occ) this.addStep(`Probe idx ${act.idx} for key ${act.key}: occupied by ${this.linearTable[act.idx].key} -> collision. Will try (h + ${act.i}) mod ${this.tableSize}.`);
-        else this.addStep(`Probe idx ${act.idx} for key ${act.key}: empty`);
+        if (occ) {
+          this.visualHighlight('linear', act.idx, 'collision');
+          this.addStep(`Probe idx ${act.idx} for key ${act.key}: occupied by ${this.linearTable[act.idx].key} -> collision. Will try (h + ${act.i}) mod ${this.tableSize}.`);
+        } else {
+          this.visualHighlight('linear', act.idx, 'probe');
+          this.addStep(`Probe idx ${act.idx} for key ${act.key}: empty`);
+        }
       }
-      else if (act.type === 'place') { this.linearTable[act.idx] = {key:act.key,occupied:true}; this.visualPlace('linear', act.idx, act.key); this.addStep(`Placed key ${act.key} at index ${act.idx}`); }
-      else if (act.type === 'fail'){ this.addStep(`Linear Probing: insertion failed for key ${act.key}`); alert('Linear Probing: insertion failed for key ' + act.key); }
-      else if (act.type === 'search_found'){ this.visualHighlight('linear', act.idx); this.addStep(`Search: found key ${act.key} at index ${act.idx}`); setTimeout(()=> alert('Found at index ' + act.idx), 100);} 
-      else if (act.type === 'search_notfound'){ this.addStep(`Search: key ${act.key} not found (linear)`); setTimeout(()=> alert('Not found (linear)'), 80);} 
-      else if (act.type === 'delete_place'){ this.linearTable[act.idx] = {key:null,occupied:false}; this.visualPlace('linear', act.idx, null); this.addStep(`Deleted key ${act.key} from index ${act.idx}`);} 
-      else if (act.type === 'delete_fail'){ this.addStep(`Delete: key ${act.key} not found (linear)`); setTimeout(()=> alert('Delete: not found (linear)'), 80);} 
+      else if (act.type === 'place') { 
+        this.linearTable[act.idx] = {key:act.key,occupied:true}; 
+        this.visualPlace('linear', act.idx, act.key); 
+        this.addStep(`Placed key ${act.key} at index ${act.idx}`); 
+      }
+      else if (act.type === 'fail'){ 
+        this.addStep(`Linear Probing: insertion failed for key ${act.key}`); 
+        alert('Linear Probing: insertion failed for key ' + act.key); 
+      }
+      else if (act.type === 'search_found'){ 
+        this.visualHighlight('linear', act.idx, 'found'); 
+        this.addStep(`Search: found key ${act.key} at index ${act.idx}`); 
+        setTimeout(()=> alert('Found at index ' + act.idx), 100);
+      } 
+      else if (act.type === 'search_notfound'){ 
+        this.addStep(`Search: key ${act.key} not found (linear)`); 
+        setTimeout(()=> alert('Not found (linear)'), 80);
+      } 
+      else if (act.type === 'delete_place'){ 
+        this.linearTable[act.idx] = {key:null,occupied:false}; 
+        this.visualPlace('linear', act.idx, null); 
+        this.addStep(`Deleted key ${act.key} from index ${act.idx}`);
+      } 
+      else if (act.type === 'delete_fail'){ 
+        this.addStep(`Delete: key ${act.key} not found (linear)`); 
+        setTimeout(()=> alert('Delete: not found (linear)'), 80);
+      } 
     }
 
     if (kind === 'quad'){
       if (act.type === 'probe') {
-        this.visualHighlight('quad', act.idx);
         const occ = this.quadTable[act.idx] && this.quadTable[act.idx].occupied;
-        if (occ) this.addStep(`Probe idx ${act.idx} for key ${act.key}: occupied by ${this.quadTable[act.idx].key} -> collision. Will try (h + ${act.i}^2) mod ${this.tableSize}.`);
-        else this.addStep(`Probe idx ${act.idx} for key ${act.key}: empty`);
+        if (occ) {
+          this.visualHighlight('quad', act.idx, 'collision');
+          this.addStep(`Probe idx ${act.idx} for key ${act.key}: occupied by ${this.quadTable[act.idx].key} -> collision. Will try (h + ${act.i}^2) mod ${this.tableSize}.`);
+        } else {
+          this.visualHighlight('quad', act.idx, 'probe');
+          this.addStep(`Probe idx ${act.idx} for key ${act.key}: empty`);
+        }
       }
-      else if (act.type === 'place') { this.quadTable[act.idx] = {key:act.key,occupied:true}; this.visualPlace('quad', act.idx, act.key); this.addStep(`Placed key ${act.key} at index ${act.idx}`); }
-      else if (act.type === 'fail'){ this.addStep(`Quadratic Probing: insertion failed for key ${act.key}`); alert('Quadratic Probing: insertion failed for key ' + act.key); }
-      else if (act.type === 'search_found'){ this.visualHighlight('quad', act.idx); this.addStep(`Search: found key ${act.key} at index ${act.idx}`); setTimeout(()=> alert('Found at index ' + act.idx), 100);} 
-      else if (act.type === 'search_notfound'){ this.addStep(`Search: key ${act.key} not found (quadratic)`); setTimeout(()=> alert('Not found (quadratic)'), 80);} 
-      else if (act.type === 'delete_place'){ this.quadTable[act.idx] = {key:null,occupied:false}; this.visualPlace('quad', act.idx, null); this.addStep(`Deleted key ${act.key} from index ${act.idx}`);} 
-      else if (act.type === 'delete_fail'){ this.addStep(`Delete: key ${act.key} not found (quadratic)`); setTimeout(()=> alert('Delete: not found (quadratic)'), 80);} 
+      else if (act.type === 'place') { 
+        this.quadTable[act.idx] = {key:act.key,occupied:true}; 
+        this.visualPlace('quad', act.idx, act.key); 
+        this.addStep(`Placed key ${act.key} at index ${act.idx}`); 
+      }
+      else if (act.type === 'fail'){ 
+        this.addStep(`Quadratic Probing: insertion failed for key ${act.key}`); 
+        alert('Quadratic Probing: insertion failed for key ' + act.key); 
+      }
+      else if (act.type === 'search_found'){ 
+        this.visualHighlight('quad', act.idx, 'found'); 
+        this.addStep(`Search: found key ${act.key} at index ${act.idx}`); 
+        setTimeout(()=> alert('Found at index ' + act.idx), 100);
+      } 
+      else if (act.type === 'search_notfound'){ 
+        this.addStep(`Search: key ${act.key} not found (quadratic)`); 
+        setTimeout(()=> alert('Not found (quadratic)'), 80);
+      } 
+      else if (act.type === 'delete_place'){ 
+        this.quadTable[act.idx] = {key:null,occupied:false}; 
+        this.visualPlace('quad', act.idx, null); 
+        this.addStep(`Deleted key ${act.key} from index ${act.idx}`);
+      } 
+      else if (act.type === 'delete_fail'){ 
+        this.addStep(`Delete: key ${act.key} not found (quadratic)`); 
+        setTimeout(()=> alert('Delete: not found (quadratic)'), 80);
+      } 
     }
 
     if (kind === 'dbl'){
       if (act.type === 'probe') {
-        this.visualHighlight('dbl', act.idx);
         const occ = this.doubleTable[act.idx] && this.doubleTable[act.idx].occupied;
-        if (occ) this.addStep(`Probe idx ${act.idx} for key ${act.key}: occupied by ${this.doubleTable[act.idx].key} -> collision. Using secondary hash step ${act.h2} to compute (h1 + i*h2) mod ${this.tableSize}.`);
-        else this.addStep(`Probe idx ${act.idx} for key ${act.key}: empty (h1=${act.h1}, h2=${act.h2})`);
+        if (occ) {
+          this.visualHighlight('dbl', act.idx, 'collision');
+          this.addStep(`Probe idx ${act.idx} for key ${act.key}: occupied by ${this.doubleTable[act.idx].key} -> collision. Using secondary hash step ${act.h2} to compute (h1 + i*h2) mod ${this.tableSize}.`);
+        } else {
+          this.visualHighlight('dbl', act.idx, 'probe');
+          this.addStep(`Probe idx ${act.idx} for key ${act.key}: empty (h1=${act.h1}, h2=${act.h2})`);
+        }
       }
-      else if (act.type === 'place') { this.doubleTable[act.idx] = {key:act.key,occupied:true}; this.visualPlace('dbl', act.idx, act.key); this.addStep(`Placed key ${act.key} at index ${act.idx} (double hashing)`); }
-      else if (act.type === 'fail'){ this.addStep(`Double Hashing: insertion failed for key ${act.key}`); alert('Double Hashing: insertion failed for key ' + act.key); }
-      else if (act.type === 'search_found'){ this.visualHighlight('dbl', act.idx); this.addStep(`Search: found key ${act.key} at index ${act.idx}`); setTimeout(()=> alert('Found at index ' + act.idx), 100);} 
-      else if (act.type === 'search_notfound'){ this.addStep(`Search: key ${act.key} not found (double)`); setTimeout(()=> alert('Not found (double)'), 80);} 
-      else if (act.type === 'delete_place'){ this.doubleTable[act.idx] = {key:null,occupied:false}; this.visualPlace('dbl', act.idx, null); this.addStep(`Deleted key ${act.key} from index ${act.idx}`);} 
-      else if (act.type === 'delete_fail'){ this.addStep(`Delete: key ${act.key} not found (double)`); setTimeout(()=> alert('Delete: not found (double)'), 80);} 
+      else if (act.type === 'place') { 
+        this.doubleTable[act.idx] = {key:act.key,occupied:true}; 
+        this.visualPlace('dbl', act.idx, act.key); 
+        this.addStep(`Placed key ${act.key} at index ${act.idx} (double hashing)`); 
+      }
+      else if (act.type === 'fail'){ 
+        this.addStep(`Double Hashing: insertion failed for key ${act.key}`); 
+        alert('Double Hashing: insertion failed for key ' + act.key); 
+      }
+      else if (act.type === 'search_found'){ 
+        this.visualHighlight('dbl', act.idx, 'found'); 
+        this.addStep(`Search: found key ${act.key} at index ${act.idx}`); 
+        setTimeout(()=> alert('Found at index ' + act.idx), 100);
+      } 
+      else if (act.type === 'search_notfound'){ 
+        this.addStep(`Search: key ${act.key} not found (double)`); 
+        setTimeout(()=> alert('Not found (double)'), 80);
+      } 
+      else if (act.type === 'delete_place'){ 
+        this.doubleTable[act.idx] = {key:null,occupied:false}; 
+        this.visualPlace('dbl', act.idx, null); 
+        this.addStep(`Deleted key ${act.key} from index ${act.idx}`);
+      } 
+      else if (act.type === 'delete_fail'){ 
+        this.addStep(`Delete: key ${act.key} not found (double)`); 
+        setTimeout(()=> alert('Delete: not found (double)'), 80);
+      } 
     }
   }
 
@@ -492,23 +584,42 @@ class HashVisualizer {
   renderTable(kind, data, container, isChain){
     container.innerHTML = '';
     for (let i=0;i<this.tableSize;i++){
-      const slot = document.createElement('div'); slot.className='slot'; slot.dataset.idx=i;
-      const idx = document.createElement('div'); idx.className='index'; idx.textContent = i;
+      const slot = document.createElement('div'); 
+      slot.className='slot'; 
+      slot.dataset.idx=i;
+      
+      const idx = document.createElement('div'); 
+      idx.className='index'; 
+      idx.textContent = i;
       slot.appendChild(idx);
 
       if (isChain){
-        const list = document.createElement('div'); list.className='chain-list';
+        const list = document.createElement('div'); 
+        list.className='chain-list';
         const arr = data[i] || [];
         if (!arr.length) {
-          const empty = document.createElement('div'); empty.className='chain-item'; empty.textContent='NULL'; empty.style.opacity='0.5'; list.appendChild(empty);
+          const empty = document.createElement('div'); 
+          empty.className='chain-item'; 
+          empty.textContent='NULL'; 
+          empty.style.opacity='0.5'; 
+          list.appendChild(empty);
         } else {
-          arr.forEach(v => { const it = document.createElement('div'); it.className='chain-item'; it.textContent = v; list.appendChild(it); });
+          arr.forEach(v => { 
+            const it = document.createElement('div'); 
+            it.className='chain-item'; 
+            it.textContent = v; 
+            list.appendChild(it); 
+          });
         }
         slot.appendChild(list);
       } else {
-        const val = document.createElement('div'); val.className='value';
+        const val = document.createElement('div'); 
+        val.className='value';
         const cell = data[i];
-        if (cell && cell.occupied) { val.textContent = cell.key; val.classList.add('placed'); }
+        if (cell && cell.occupied) { 
+          val.textContent = cell.key; 
+          val.classList.add('placed'); 
+        }
         else val.textContent = 'NULL';
         slot.appendChild(val);
       }
@@ -517,13 +628,49 @@ class HashVisualizer {
     }
   }
 
-  visualHighlight(kind, idx){
-    // highlight slot in the single table view
+  visualHighlight(kind, idx, highlightType = 'default'){
+    // highlight slot in the single table view with different colors based on type
     const container = this.el.singleTable;
     if (!container) return;
-    container.querySelectorAll('.slot').forEach(s => s.classList.remove('highlight'));
+    
+    // Remove all highlight classes first
+    container.querySelectorAll('.slot').forEach(s => {
+      s.classList.remove('highlight', 'collision', 'success', 'found', 'notfound');
+    });
+    
     const slot = container.querySelector('.slot[data-idx="'+idx+'"]');
-    if (slot) slot.classList.add('highlight');
+    if (slot) {
+      // Apply different highlight classes based on the type
+      switch(highlightType) {
+        case 'collision':
+          slot.classList.add('collision');
+          // Add animation to chain items if applicable
+          const chainItems = slot.querySelectorAll('.chain-item');
+          chainItems.forEach(item => {
+            item.classList.add('collision');
+          });
+          break;
+        case 'success':
+        case 'found':
+          slot.classList.add('success');
+          // Add animation to chain items if applicable
+          const successItems = slot.querySelectorAll('.chain-item');
+          successItems.forEach(item => {
+            item.classList.add('success');
+          });
+          break;
+        case 'notfound':
+          slot.classList.add('notfound');
+          // Add animation to chain items if applicable
+          const notFoundItems = slot.querySelectorAll('.chain-item');
+          notFoundItems.forEach(item => {
+            item.classList.add('notfound');
+          });
+          break;
+        default:
+          slot.classList.add('highlight');
+      }
+    }
   }
 
   visualPlace(kind, idx, key){
@@ -533,8 +680,11 @@ class HashVisualizer {
     if (!container) return;
     const slot = container.querySelector('.slot[data-idx="'+idx+'"]');
     if (slot) {
-      slot.classList.add('highlight');
-      setTimeout(()=> { slot.classList.remove('highlight'); }, this.speed);
+      // Use success highlight for placement
+      slot.classList.add('success');
+      setTimeout(()=> { 
+        slot.classList.remove('success'); 
+      }, this.speed);
     }
   }
 }

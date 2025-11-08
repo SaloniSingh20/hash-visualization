@@ -3,74 +3,137 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hashing Visualizer — Open Hashing & Probing</title>
+  <title>Hashing Visualizer — Interactive Data Structure</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">🔐</div>
-      <div class="title">Hash Table Simulator</div>
-    </div>
+  <div class="container">
+    <header class="header">
+      <div class="header-content">
+        <div class="brand">
+          <div class="logo">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div class="brand-text">
+            <h1>Hash Table Visualizer</h1>
+            <p>Interactive Data Structure Learning Tool</p>
+          </div>
+        </div>
+        
+        <div class="header-controls">
+          <div class="control-group">
+            <label class="control-label">
+              <i class="fas fa-table"></i> Table Size
+              <input id="tableSize" type="number" min="3" value="10">
+            </label>
 
-      <div class="top-controls">
-      <label class="small">Size
-        <input id="tableSize" type="number" min="3" value="10">
-      </label>
+            <label class="control-label">
+              <i class="fas fa-cogs"></i> Hashing Mode
+              <select id="modeSelect">
+                <option value="linear">Linear Probing</option>
+                <option value="quad">Quadratic Probing</option>
+                <option value="dbl">Double Hashing</option>
+                <option value="chain">Separate Chaining</option>
+              </select>
+            </label>
 
-      <label class="small">Mode
-        <select id="modeSelect">
-          <option value="linear">Linear</option>
-          <option value="quad">Quadratic</option>
-          <option value="dbl">Double</option>
-          <option value="chain">Separate Chaining</option>
-        </select>
-      </label>
+            <button id="initBtn" class="btn primary">
+              <i class="fas fa-plus-circle"></i> Create
+            </button>
+          </div>
 
-  <button id="initBtn" class="btn primary">Create</button>
-  <div class="break"></div>
+          <div class="control-group">
+            <label class="control-label">
+              <i class="fas fa-function"></i> Primary Hash
+              <input id="hashPrimary" type="text" value="k % n" title="Use k for key and n for tableSize" placeholder="k % n">
+            </label>
+            <label class="control-label hash-secondary" id="hashSecondaryLabel">
+              <i class="fas fa-superscript"></i> Secondary Hash
+              <input id="hashSecondary" type="text" value="1 + (k % (n - 1))" title="Use k for key and n for tableSize" placeholder="1 + (k % (n - 1))">
+            </label>
+          </div>
 
-      <label class="small">Primary (k=key, n=tableSize)
-        <input id="hashPrimary" type="text" value="k % n" title="Use k for key and n for tableSize" style="min-width:160px">
-      </label>
-      <label class="small hash-secondary" id="hashSecondaryLabel">Secondary (k=key, n=tableSize)
-        <input id="hashSecondary" type="text" value="1 + (k % (n - 1))" title="Use k for key and n for tableSize" style="min-width:140px">
-      </label>
-
-  <!-- bulkKeys removed; Prepare will prompt if needed -->
-      <div class="top-row-keys">
-        <input id="singleKey" class="key-input" placeholder="enter key">
-        <button id="insertKeyBtn" class="btn success">Insert</button>
-        <button id="searchKeyBtn" class="btn info">Search</button>
-        <button id="deleteKeyBtn" class="btn warn">Delete</button>
-      </div>
-      <button id="resetBtn" class="btn danger">Clear</button>
-
-      <button id="enqueueBtn" class="btn">Prepare</button>
-    </div>
-  </header>
-
-  <div class="notice" id="noticeBar">Created hash table with size 10 and mode linear</div>
-
-  <main>
-    <section class="visuals three-col">
-      <div class="visual card" id="singleViz">
-        <h3 id="singleTitle">Hash Table</h3>
-        <div class="table" id="singleTable"></div>
-      </div>
-
-      <div class="visual card" id="stepsViz">
-        <h3>🔍 Execution Steps</h3>
-        <div id="stepsColumn" class="steps-col">
-          <ol id="stepsList"></ol>
+          <div class="control-group">
+            <div class="key-input-group">
+              <input id="singleKey" class="key-input" placeholder="Enter key value">
+              <div class="key-buttons">
+                <button id="insertKeyBtn" class="btn success" title="Insert key">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button id="searchKeyBtn" class="btn info" title="Search key">
+                  <i class="fas fa-search"></i>
+                </button>
+                <button id="deleteKeyBtn" class="btn warn" title="Delete key">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <button id="enqueueBtn" class="btn" title="Prepare multiple keys">
+              <i class="fas fa-layer-group"></i> Prepare
+            </button>
+            <button id="resetBtn" class="btn danger" title="Clear table">
+              <i class="fas fa-redo"></i> Reset
+            </button>
+          </div>
         </div>
       </div>
-    </section>
-  </main>
+    </header>
 
-  <footer>
-    <small>Local visualization — expressions are evaluated locally in your browser.</small>
-  </footer>
+    <div class="notice" id="noticeBar">
+      <i class="fas fa-info-circle"></i> Created hash table with size 10 and mode linear
+    </div>
+
+    <main class="main-content">
+      <div class="visualization-container">
+        <div class="visual card" id="singleViz">
+          <div class="card-header">
+            <h3 id="singleTitle">Hash Table</h3>
+            <div class="card-controls">
+              <button id="runBtn" class="btn small" title="Run all operations">
+                <i class="fas fa-play"></i>
+              </button>
+              <button id="stepBtn" class="btn small" title="Step through operations">
+                <i class="fas fa-step-forward"></i>
+              </button>
+              <button id="pauseBtn" class="btn small" title="Pause execution">
+                <i class="fas fa-pause"></i>
+              </button>
+            </div>
+          </div>
+          <div class="table-container">
+            <div class="table" id="singleTable"></div>
+          </div>
+        </div>
+
+        <div class="visual card" id="stepsViz">
+          <div class="card-header">
+            <h3><i class="fas fa-list-ol"></i> Execution Steps</h3>
+            <button id="clearStepsBtn" class="btn small" title="Clear steps">
+              <i class="fas fa-eraser"></i>
+            </button>
+          </div>
+          <div id="stepsColumn" class="steps-col">
+            <ol id="stepsList"></ol>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-info">
+          <i class="fas fa-shield-alt"></i>
+          <span>Local visualization — expressions are evaluated locally in your browser.</span>
+        </div>
+        <div class="footer-links">
+          <a href="#" title="Documentation"><i class="fas fa-question-circle"></i></a>
+          <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </footer>
+  </div>
 
   <script src="script.js"></script>
 </body>
