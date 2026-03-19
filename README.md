@@ -90,12 +90,6 @@ g++ main.cpp -o hash_demo
 
 ---
 
-## 👩‍💻 Author  
-
-Saloni Singh  
-https://github.com/SaloniSingh20  
-
----
 
 ## ⭐ Support  
 
