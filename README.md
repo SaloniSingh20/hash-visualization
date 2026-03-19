@@ -4,11 +4,6 @@ An interactive web-based tool to visualize how **hash tables** work, including i
 
 ---
 
-## 🌐 Live Demo  
-https://hashing-simulator-theta.vercel.app  
-
----
-
 ## 📌 Features  
 
 - Visualizes hash table operations step-by-step  
